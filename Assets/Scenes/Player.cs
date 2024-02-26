@@ -6,26 +6,32 @@ public class Player : MonoBehaviour
 {
     [SerializeField] private Tilemap tilemap = null;
     [SerializeField] private float moveSpeed = 0f;
+    private Animator animator;
 
     private bool isMoving = false;
 
+    private void Awake()
+    {
+        animator = GetComponent<Animator>();
+    }
+
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.RightArrow) && !isMoving)
+        if(Input.GetKey(KeyCode.RightArrow) && !isMoving)
         {
-            StartCoroutine(Co_PlayerMove(Vector2Int.right));
+            MoveRight();
         }
-        else if(Input.GetKeyDown(KeyCode.LeftArrow) && !isMoving)
+        else if(Input.GetKey(KeyCode.LeftArrow) && !isMoving)
         {
-            StartCoroutine(Co_PlayerMove(Vector2Int.left));
+            MoveLeft();
         }
-        else if (Input.GetKeyDown(KeyCode.UpArrow) && !isMoving)
+        else if (Input.GetKey(KeyCode.UpArrow) && !isMoving)
         {
-            StartCoroutine(Co_PlayerMove(Vector2Int.up));
+            MoveUp();
         }
-        else if (Input.GetKeyDown(KeyCode.DownArrow) && !isMoving)
+        else if (Input.GetKey(KeyCode.DownArrow) && !isMoving)
         {
-            StartCoroutine(Co_PlayerMove(Vector2Int.down));
+            MoveDown();
         }
     }
 
@@ -33,9 +39,9 @@ public class Player : MonoBehaviour
     {
         isMoving = true;
 
-        Vector3Int myCellPosition = tilemap.WorldToCell(transform.position); // 현재 위치를 타일맵 상의 셀 위치로 변환
+        Vector3Int myCellPosition = tilemap.WorldToCell(transform.position); // 현재 위치의 셀 좌표를 가져옴
 
-        Vector3Int targetCell = myCellPosition + new Vector3Int(Direction.x, Direction.y, 0); // 이동할 셀 위치 계산
+        Vector3Int targetCell = myCellPosition + new Vector3Int(Direction.x, Direction.y, 0); // 이동할 셀의 위치
 
         Vector3 targetPos = tilemap.GetCellCenterWorld(targetCell); // 이동할 셀의 중심 위치를 가져옴
 
@@ -55,5 +61,25 @@ public class Player : MonoBehaviour
         transform.position = targetPos; // 정확한 위치로 이동
 
         isMoving = false;
+    }
+
+    private void MoveRight()
+    {
+        StartCoroutine(Co_PlayerMove(Vector2Int.right));
+    }
+
+    private void MoveLeft()
+    {
+        StartCoroutine(Co_PlayerMove(Vector2Int.left));
+    }
+
+    private void MoveUp()
+    {
+        StartCoroutine(Co_PlayerMove(Vector2Int.up));
+    }
+
+    private void MoveDown()
+    {
+        StartCoroutine(Co_PlayerMove(Vector2Int.down));
     }
 }
