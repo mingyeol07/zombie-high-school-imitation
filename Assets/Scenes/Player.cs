@@ -8,6 +8,13 @@ public class Player : MonoBehaviour
     [SerializeField] private float moveSpeed = 0f;
     private Animator animator;
 
+    private readonly int hashMoveX = Animator.StringToHash("PlayerX");
+    private readonly int hashMoveY = Animator.StringToHash("PlayerY");
+    private readonly int hashMove = Animator.StringToHash("IsMove");
+
+    private float moveX;
+    private float moveY;
+
     private bool isMoving = false;
 
     private void Awake()
@@ -17,21 +24,27 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetKey(KeyCode.RightArrow) && !isMoving)
+        AnimatorController();
+
+        if (Input.GetKey(KeyCode.RightArrow) && !isMoving)
         {
             MoveRight();
+            
         }
         else if(Input.GetKey(KeyCode.LeftArrow) && !isMoving)
         {
             MoveLeft();
+            
         }
         else if (Input.GetKey(KeyCode.UpArrow) && !isMoving)
         {
             MoveUp();
+           
         }
         else if (Input.GetKey(KeyCode.DownArrow) && !isMoving)
         {
             MoveDown();
+            
         }
     }
 
@@ -57,12 +70,23 @@ public class Player : MonoBehaviour
 
     private IEnumerator Co_PlayerMove(Vector2Int Direction)
     {
+        if(Direction.x == 0)
+        {
+            moveY = Direction.y;
+            moveX = 0;
+        }
+        else if(Direction.y == 0) 
+        {
+            moveX = Direction.x;
+            moveY = 0;
+        }
+
         isMoving = true;
 
         // 현재 위치의 셀 좌표를 가져옴
         Vector3Int myCellPosition = tilemap.WorldToCell(transform.position);
 
-        // 이동할 셀의 위치
+        // Vector의 방향값을 받아서 지금포지션에 더해줌
         Vector3Int targetCell = myCellPosition + new Vector3Int(Direction.x, Direction.y, 0); 
 
         // 이동할 셀의 중심 위치를 가져옴
@@ -87,4 +111,10 @@ public class Player : MonoBehaviour
         isMoving = false;
     }
 
+    private void AnimatorController()
+    {
+        animator.SetFloat(hashMoveX, moveX);
+        animator.SetFloat(hashMoveY, moveY);
+        animator.SetBool(hashMove, isMoving);
+    }
 }
