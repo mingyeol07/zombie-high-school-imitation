@@ -80,6 +80,8 @@ public class Player : MonoBehaviour
             moveX = Direction.x;
             moveY = 0;
         }
+        animator.SetFloat(hashMoveX, moveX);
+        animator.SetFloat(hashMoveY, moveY);
 
         isMoving = true;
 
@@ -113,8 +115,6 @@ public class Player : MonoBehaviour
 
     private void AnimatorController()
     {
-        animator.SetFloat(hashMoveX, moveX);
-        animator.SetFloat(hashMoveY, moveY);
         animator.SetBool(hashMove, isMoving);
     }
 }
