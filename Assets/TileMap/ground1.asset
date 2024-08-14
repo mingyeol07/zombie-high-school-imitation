@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 13312, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: Itch release raw tileset 01_0
+  m_Name: ground1
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: -509793814, guid: 9563ce94d80afdd409a3cb509b033ebd, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 0c5f5348ce639e844993721ec0268732, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1
