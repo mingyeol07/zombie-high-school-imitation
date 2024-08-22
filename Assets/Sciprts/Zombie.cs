@@ -12,11 +12,8 @@ public class Zombie : MonoBehaviour
     private Animator animator;
     private SpriteRenderer spriteRenderer;
 
-    private float colorR;
-    private float colorG;
-    private float colorB;
-
-    private readonly float hitColorTime =1f;
+    private float hitMaxColorTime = 0.5f;
+    private float hitCurColorTime;
 
     private readonly int hashMoveX = Animator.StringToHash("PlayerX");
     private readonly int hashMoveY = Animator.StringToHash("PlayerY");
@@ -31,17 +28,23 @@ public class Zombie : MonoBehaviour
     private void Update()
     {
         moveTick += Time.deltaTime;
-        if(!isTargeting && moveTick > 1)
+        if (!isTargeting && moveTick > 1)
         {
             WithoutPlayerMove();
             moveTick = 0;
         }
 
-        if (spriteRenderer.color != Color.white)
+        // 색상 변화 처리
+        if (hitCurColorTime < hitMaxColorTime)
         {
-            spriteRenderer.color = Color.Lerp(spriteRenderer.color, Color.white, Time.deltaTime / hitColorTime);
+            hitCurColorTime += Time.deltaTime;
+            spriteRenderer.color = Color.Lerp(Color.red, Color.white, hitCurColorTime / hitMaxColorTime);
         }
 
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Hit();
+        }
     }
 
     private void WithoutPlayerMove()
@@ -71,5 +74,6 @@ public class Zombie : MonoBehaviour
     public void Hit()
     {
         spriteRenderer.color = Color.red;
+        hitCurColorTime = 0f;
     }
 }
