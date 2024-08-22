@@ -18,8 +18,6 @@ public class MovableObject : MonoBehaviour
         animator.SetFloat(hashMoveY, direction.y);
         animator.SetBool(hashMove, true);
 
-        isMoving = true;
-
         // 현재 위치의 셀 좌표를 가져옴
         Vector3Int myCellPosition = tilemap.WorldToCell(transform.position);
 
@@ -31,11 +29,12 @@ public class MovableObject : MonoBehaviour
         // 타일이 CustomTile이고, 벽인지 검사
         if (tilemap.GetTile(pos) is CustomTile customTile && customTile.TileType == TileTypeID.Wall)
         {
-            yield return null;
             isMoving = false;
             animator.SetBool(hashMove, false);
             yield break;
         }
+
+        isMoving = true;
 
         // 이동 수행
         float distance = Vector3.Distance(transform.position, targetPos);
