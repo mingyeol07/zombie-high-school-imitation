@@ -5,6 +5,7 @@ using UnityEngine;
 public class Zombie : MonoBehaviour
 {
     [SerializeField] private Transform isTargetPlayer;
+    [SerializeField] private LayerMask playerLayer;
     private bool isTargeting;
     private float moveTick;
 
@@ -34,17 +35,36 @@ public class Zombie : MonoBehaviour
             moveTick = 0;
         }
 
+        if(isTargetPlayer != null)
+        {
+            Collider2D player = Physics2D.OverlapBox(transform.position, new Vector2(5, 5), 0, playerLayer);
+            if(player != null)
+            {
+                isTargetPlayer = player.transform;
+            }
+        }
+        else
+        {
+            // A*
+            TargetingMove();
+        }
+
         // 색상 변화 처리
         if (hitCurColorTime < hitMaxColorTime)
         {
             hitCurColorTime += Time.deltaTime;
-            spriteRenderer.color = Color.Lerp(Color.red, Color.white, hitCurColorTime / hitMaxColorTime);
+            spriteRenderer.color = Color.Lerp(Color.red, Color.green, hitCurColorTime / hitMaxColorTime);
         }
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Hit();
         }
+    }
+
+    private void TargetingMove()
+    {
+
     }
 
     private void WithoutPlayerMove()

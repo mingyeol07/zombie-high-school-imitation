@@ -4,11 +4,20 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     [SerializeField] private MovableObject movableObject;
+    [SerializeField] private LayerMask zombieLayer;
+    [SerializeField] private Animator weaponAnim;
     private Animator animator;
 
-    private readonly int hashMoveX = Animator.StringToHash("PlayerX");
-    private readonly int hashMoveY = Animator.StringToHash("PlayerY");
+    private Vector2Int localDirection;
+    private float localAngle;
+
+    private readonly int hashMoveX = Animator.StringToHash("MoveX");
+    private readonly int hashMoveY = Animator.StringToHash("MoveY");
     private readonly int hashMove = Animator.StringToHash("IsMove");
+    private readonly int hashAttack = Animator.StringToHash("Attack");
+
+    private readonly float chairmanOffset = 1.5f;
+    private readonly Vector2 chairmanAttack = new Vector2(3, 2);
 
     private void Awake()
     {
@@ -19,26 +28,57 @@ public class Player : MonoBehaviour
     {
         AnimatorController();
 
-        if (Input.GetKey(KeyCode.RightArrow))
+        if(!movableObject.IsMoving)
         {
-            StartCoroutine(movableObject.Move(Vector2Int.right, animator, hashMoveX, hashMoveY, hashMove));
+            if (Input.GetKey(KeyCode.RightArrow))
+            {
+                localAngle = 90;
+                localDirection = Vector2Int.right;
+                StartCoroutine(movableObject.Move(localDirection, animator, hashMoveX, hashMoveY, hashMove));
+            }
+            else if (Input.GetKey(KeyCode.LeftArrow))
+            {
+                localAngle = -90;
+                localDirection = Vector2Int.left;
+                StartCoroutine(movableObject.Move(localDirection, animator, hashMoveX, hashMoveY, hashMove));
+            }
+            else if (Input.GetKey(KeyCode.UpArrow))
+            {
+                localAngle = 180;
+                localDirection = Vector2Int.up;
+                StartCoroutine(movableObject.Move(localDirection, animator, hashMoveX, hashMoveY, hashMove));
+            }
+            else if (Input.GetKey(KeyCode.DownArrow))
+            {
+                localAngle = 0;
+                localDirection = Vector2Int.down;
+                StartCoroutine(movableObject.Move(localDirection, animator, hashMoveX, hashMoveY, hashMove));
+            }
         }
-        else if (Input.GetKey(KeyCode.LeftArrow))
+
+        if (Input.GetKeyUp(KeyCode.J))
         {
-            StartCoroutine(movableObject.Move(Vector2Int.left, animator, hashMoveX, hashMoveY, hashMove));
-        }
-        else if (Input.GetKey(KeyCode.UpArrow))
-        {
-            StartCoroutine(movableObject.Move(Vector2Int.up, animator, hashMoveX, hashMoveY, hashMove));
-        }
-        else if (Input.GetKey(KeyCode.DownArrow))
-        {
-            StartCoroutine(movableObject.Move(Vector2Int.down, animator, hashMoveX, hashMoveY, hashMove));
+            AttackChairman();
         }
     }
 
     private void AnimatorController()
     {
         animator.SetBool(hashMove, movableObject != null && movableObject.IsMoving);
+    }
+
+    private void AttackChairman()
+    {
+
+        weaponAnim.SetFloat(hashMoveX, localDirection.x);
+        weaponAnim.SetFloat(hashMoveY, localDirection.y);
+        weaponAnim.SetTrigger(hashAttack);
+
+        Vector2 colliderOffset = (Vector2)transform.position + new Vector2(localDirection.x * chairmanOffset, localDirection.y * chairmanOffset);
+        Collider2D[] colliders = Physics2D.OverlapBoxAll(colliderOffset, chairmanAttack, localAngle, zombieLayer);
+        foreach (Collider2D collider in colliders)
+        {
+            collider.transform.GetComponent<Zombie>()?.Hit();
+        }
     }
 }
