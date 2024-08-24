@@ -5,10 +5,10 @@ public class Player : MonoBehaviour
 {
     [SerializeField] private MovableObject movableObject;
     [SerializeField] private LayerMask zombieLayer;
-    [SerializeField] private Animator weaponAnim;
+    [SerializeField] private Animator weaponAnimator;
     private Animator animator;
 
-    private Vector2Int localDirection;
+    private Vector2 localDirection;
     private float localAngle;
 
     private readonly int hashMoveX = Animator.StringToHash("MoveX");
@@ -33,25 +33,25 @@ public class Player : MonoBehaviour
             if (Input.GetKey(KeyCode.RightArrow))
             {
                 localAngle = 90;
-                localDirection = Vector2Int.right;
+                localDirection = Vector2.right;
                 StartCoroutine(movableObject.Move(localDirection, animator, hashMoveX, hashMoveY, hashMove));
             }
             else if (Input.GetKey(KeyCode.LeftArrow))
             {
                 localAngle = -90;
-                localDirection = Vector2Int.left;
+                localDirection = Vector2.left;
                 StartCoroutine(movableObject.Move(localDirection, animator, hashMoveX, hashMoveY, hashMove));
             }
             else if (Input.GetKey(KeyCode.UpArrow))
             {
                 localAngle = 180;
-                localDirection = Vector2Int.up;
+                localDirection = Vector2.up;
                 StartCoroutine(movableObject.Move(localDirection, animator, hashMoveX, hashMoveY, hashMove));
             }
             else if (Input.GetKey(KeyCode.DownArrow))
             {
                 localAngle = 0;
-                localDirection = Vector2Int.down;
+                localDirection = Vector2.down;
                 StartCoroutine(movableObject.Move(localDirection, animator, hashMoveX, hashMoveY, hashMove));
             }
         }
@@ -69,10 +69,9 @@ public class Player : MonoBehaviour
 
     private void AttackChairman()
     {
-
-        weaponAnim.SetFloat(hashMoveX, localDirection.x);
-        weaponAnim.SetFloat(hashMoveY, localDirection.y);
-        weaponAnim.SetTrigger(hashAttack);
+        weaponAnimator.SetFloat(hashMoveX, localDirection.x);
+        weaponAnimator.SetFloat(hashMoveY, localDirection.y);
+        weaponAnimator.SetTrigger(hashAttack);
 
         Vector2 colliderOffset = (Vector2)transform.position + new Vector2(localDirection.x * chairmanOffset, localDirection.y * chairmanOffset);
         Collider2D[] colliders = Physics2D.OverlapBoxAll(colliderOffset, chairmanAttack, localAngle, zombieLayer);

@@ -4,12 +4,19 @@ using UnityEngine.Tilemaps;
 
 public class MovableObject : MonoBehaviour
 {
-    public Tilemap tilemap;
-    public float moveSpeed = 0f;
+    private Tilemap tilemap;
+    [SerializeField] private float moveSpeed = 0f;
     private bool isMoving = false;
     public bool IsMoving {  get { return isMoving; } }
+    private Vector3Int myTilePosition;
+    public Vector3Int MyTilePosition { get { return myTilePosition; } }
 
-    public IEnumerator Move(Vector2Int direction, Animator animator, int hashMoveX, int hashMoveY, int hashMove)
+    private void Start()
+    {
+        tilemap = GameManager.Instance.WallTilemap;
+    }
+
+    public IEnumerator Move(Vector2 direction, Animator animator, int hashMoveX, int hashMoveY, int hashMove)
     {
         if (isMoving) yield break;
 
@@ -22,15 +29,15 @@ public class MovableObject : MonoBehaviour
         Vector3Int myCellPosition = tilemap.WorldToCell(transform.position);
 
         // 이동할 셀의 중심 위치를 계산
-        Vector3Int targetCell = myCellPosition + new Vector3Int(direction.x, direction.y, 0);
+        Vector3Int targetCell = myCellPosition + new Vector3Int((int)direction.x, (int)direction.y, 0);
         Vector3 targetPos = tilemap.GetCellCenterWorld(targetCell);
-        Vector3Int pos = new Vector3Int(Mathf.FloorToInt(targetPos.x), Mathf.FloorToInt(targetPos.y), Mathf.FloorToInt(targetPos.z));
+
+        // GetTile로 위치의 해당하는 타일을 가져오기 위한 Vector3Int 변수
+        Vector3Int tilePos = new Vector3Int(Mathf.FloorToInt(targetPos.x), Mathf.FloorToInt(targetPos.y), Mathf.FloorToInt(targetPos.z));
 
         // 타일이 CustomTile이고, 벽인지 검사
-        if (tilemap.GetTile(pos) is CustomTile customTile && customTile.TileType == TileTypeID.Wall)
+        if (tilemap.GetTile(tilePos) is CustomTile customTile && customTile.TileType == TileTypeID.Wall)
         {
-            isMoving = true;
-            yield return null;
             isMoving = false;
             animator.SetBool(hashMove, false);
             yield break;
@@ -39,13 +46,13 @@ public class MovableObject : MonoBehaviour
         isMoving = true;
 
         // 이동 수행
-        float distance = Vector3.Distance(transform.position, targetPos);
+        float distance = Vector2.Distance(transform.position, targetPos);
         float duration = distance / moveSpeed;
         float elapsedTime = 0f;
 
         while (elapsedTime < duration)
         {
-            transform.position = Vector3.MoveTowards(transform.position, targetPos, moveSpeed * Time.deltaTime);
+            transform.position = Vector2.MoveTowards(transform.position, targetPos, moveSpeed * Time.deltaTime);
             elapsedTime += Time.deltaTime;
             yield return null;
         }
@@ -54,5 +61,7 @@ public class MovableObject : MonoBehaviour
 
         isMoving = false;
         animator.SetBool(hashMove, false);
+
+        myTilePosition = tilePos;
     }
 }

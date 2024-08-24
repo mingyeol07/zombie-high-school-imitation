@@ -253,7 +253,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d4a0de9f6e08bf479a2663475ada24b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tilemap: {fileID: 708658056}
   moveSpeed: 8
 --- !u!114 &452652171
 MonoBehaviour:
@@ -267,7 +266,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 464e275efc8cdb3408920571338f5db1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isTargetPlayer: {fileID: 0}
+  targetPlayer: {fileID: 0}
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 256
   movableObject: {fileID: 452652170}
 --- !u!212 &452652172
 SpriteRenderer:
@@ -3074,7 +3076,7 @@ MonoBehaviour:
   zombieLayer:
     serializedVersion: 2
     m_Bits: 512
-  weaponAnim: {fileID: 1931544990}
+  weaponAnimator: {fileID: 0}
 --- !u!212 &1391848386
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -3135,7 +3137,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1391848384}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.5, y: 0.5, z: 0}
+  m_LocalPosition: {x: 1.5, y: -2.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3176,7 +3178,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d4a0de9f6e08bf479a2663475ada24b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tilemap: {fileID: 708658056}
   moveSpeed: 8
 --- !u!61 &1391848390
 BoxCollider2D:
@@ -3298,6 +3299,51 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!1 &2099458900
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2099458902}
+  - component: {fileID: 2099458901}
+  m_Layer: 0
+  m_Name: GameManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2099458901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2099458900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8854bd2138e8c44b87239035a491f5e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  wallTilemap: {fileID: 708658056}
+--- !u!4 &2099458902
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2099458900}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2140010714
 GameObject:
   m_ObjectHideFlags: 0
