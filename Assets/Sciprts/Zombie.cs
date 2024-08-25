@@ -90,6 +90,7 @@ public class Zombie : MonoBehaviour
                 if (openSet[i].FCost < currentNode.FCost ||
                     (openSet[i].FCost == currentNode.FCost && openSet[i].HCost < currentNode.HCost))
                 {
+                    Debug.Log("currentNode OK");
                     currentNode = openSet[i];
                 }
             }
@@ -114,7 +115,7 @@ public class Zombie : MonoBehaviour
                 if (newCostToNeighbor < neighbor.GCost || !openSet.Contains(neighbor))
                 {
                     neighbor.GCost = newCostToNeighbor;
-                    neighbor.HCost = GetDistance(currentNode, playerNode);
+                    neighbor.HCost = GetDistance(neighbor, playerNode);
                     neighbor.Parent = currentNode;
 
                     if (!openSet.Contains(neighbor))
@@ -163,6 +164,10 @@ public class Zombie : MonoBehaviour
             currentNode = currentNode.Parent;
         }
         path.Reverse();
+
+        for(int i =  0; i < path.Count; i++) {
+            Debug.Log(path[i].GridPosition);
+        }
 
         // path를 통해 좀비를 움직이게 하거나 그리드를 시각화할 수 있습니다.
     }
