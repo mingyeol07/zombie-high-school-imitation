@@ -362,7 +362,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.9, y: 0.9}
+  m_Size: {x: 0.6, y: 0.6}
   m_EdgeRadius: 0
 --- !u!1 &519420028
 GameObject:
@@ -3076,7 +3076,7 @@ MonoBehaviour:
   zombieLayer:
     serializedVersion: 2
     m_Bits: 512
-  weaponAnimator: {fileID: 0}
+  weaponAnimator: {fileID: 1931544990}
 --- !u!212 &1391848386
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -3203,7 +3203,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.9, y: 0.9}
+  m_Size: {x: 0.6, y: 0.6}
   m_EdgeRadius: 0
 --- !u!1 &1794450414
 GameObject:

@@ -15,6 +15,8 @@ public class Zombie : MonoBehaviour
     private Animator animator;
     private SpriteRenderer spriteRenderer;
 
+    private List<Node> movePath;
+
     private float hitMaxColorTime = 0.5f;
     private float hitCurColorTime;
 
@@ -58,8 +60,13 @@ public class Zombie : MonoBehaviour
         }
         else
         {
-            // A*
-            TargetingMoveWithAStar();
+            moveTick += Time.deltaTime;
+            if (moveTick > 1)
+            {
+                TargetingMoveWithAStar();
+                MoveAlongPath();
+                moveTick = 0;
+            }
         }
     }
 
@@ -90,7 +97,6 @@ public class Zombie : MonoBehaviour
                 if (openSet[i].FCost < currentNode.FCost ||
                     (openSet[i].FCost == currentNode.FCost && openSet[i].HCost < currentNode.HCost))
                 {
-                    Debug.Log("currentNode OK");
                     currentNode = openSet[i];
                 }
             }
@@ -140,14 +146,21 @@ public class Zombie : MonoBehaviour
         foreach (Vector3Int direction in directions)
         {
             Vector3Int neighborPos = node.GridPosition + direction;
-            if (tilemap.HasTile(neighborPos))  // 해당 위치에 타일이 존재하는지 확인합니다.
-            {
-                bool walkable = true;
-                if (tilemap.GetTile(neighborPos) is CustomTile customTile && customTile.TileType != TileTypeID.Ground)
-                    walkable = false;
+            bool walkable = true;
 
-                neighbors.Add(new Node(walkable, neighborPos, node.GCost, node.HCost));
-            }
+            //if (tilemap.GetTile(neighborPos) is CustomTile customTile && customTile.TileType != TileTypeID.Ground)
+            //{
+            //    walkable = false;
+            //}
+            //else
+            //{
+            //    // 타일이 없는 경우 (null 타일일 가능성이 있음)
+            //    walkable = true;
+            //}
+
+            if (tilemap.HasTile(neighborPos)) walkable = false;
+
+            neighbors.Add(new Node(walkable, neighborPos, node.GCost, node.HCost));
         }
 
         return neighbors;
@@ -165,11 +178,30 @@ public class Zombie : MonoBehaviour
         }
         path.Reverse();
 
-        for(int i =  0; i < path.Count; i++) {
-            Debug.Log(path[i].GridPosition);
+        if (path == null || path.Count == 0)
+        {
+            Debug.LogError("Path is null or empty!");
+            return;
         }
 
-        // path를 통해 좀비를 움직이게 하거나 그리드를 시각화할 수 있습니다.
+        movePath = path;
+    }
+
+    private void MoveAlongPath()
+    {
+        if (movePath == null || movePath.Count == 0)
+        {
+            Debug.LogError("MovePath is null or empty!");
+            return;
+        }
+
+        if (movableObject.IsMoving) return;
+
+        Vector3 nextStep = movePath[0].GridPosition;
+        movePath.RemoveAt(0);
+
+        Vector3 direction = (nextStep - GameManager.Instance.WallTilemap.WorldToCell(transform.position)).normalized;
+        StartCoroutine(movableObject.Move(direction, animator, hashMoveX, hashMoveY, hashMove));
     }
 
     private int GetDistance(Node nodeA, Node nodeB)
@@ -179,7 +211,7 @@ public class Zombie : MonoBehaviour
         int dstY = Mathf.Abs(nodeA.GridPosition.y - nodeB.GridPosition.y);
 
         // 맨해튼 거리를 계산합니다.
-        return 10 * (dstX + dstY);
+        return dstX + dstY;
     }
 
     private void WithoutPlayerMove()

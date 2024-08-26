@@ -1,13 +1,14 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using System;
 
 public class MovableObject : MonoBehaviour
 {
     private Tilemap tilemap;
     [SerializeField] private float moveSpeed = 0f;
     private bool isMoving = false;
-    public bool IsMoving {  get { return isMoving; } }
+    public bool IsMoving { get { return isMoving; } }
     private Vector3Int myTilePosition;
     public Vector3Int MyTilePosition { get { return myTilePosition; } }
 
@@ -16,26 +17,19 @@ public class MovableObject : MonoBehaviour
         tilemap = GameManager.Instance.WallTilemap;
     }
 
-    public IEnumerator Move(Vector2 direction, Animator animator, int hashMoveX, int hashMoveY, int hashMove)
+    public IEnumerator Move(Vector2 direction, Animator animator, int hashMoveX, int hashMoveY, int hashMove, Action onMoveComplete = null)
     {
         if (isMoving) yield break;
 
-        // 방향에 따른 애니메이터 파라미터 설정
         animator.SetBool(hashMove, true);
         animator.SetFloat(hashMoveX, direction.x);
         animator.SetFloat(hashMoveY, direction.y);
 
-        // 현재 위치의 셀 좌표를 가져옴
         Vector3Int myCellPosition = tilemap.WorldToCell(transform.position);
-
-        // 이동할 셀의 중심 위치를 계산
         Vector3Int targetCell = myCellPosition + new Vector3Int((int)direction.x, (int)direction.y, 0);
         Vector3 targetPos = tilemap.GetCellCenterWorld(targetCell);
-
-        // GetTile로 위치의 해당하는 타일을 가져오기 위한 Vector3Int 변수
         Vector3Int tilePos = new Vector3Int(Mathf.FloorToInt(targetPos.x), Mathf.FloorToInt(targetPos.y), Mathf.FloorToInt(targetPos.z));
 
-        // 타일이 CustomTile이고, 벽인지 검사
         if (tilemap.GetTile(tilePos) is CustomTile customTile && customTile.TileType == TileTypeID.Wall)
         {
             isMoving = false;
@@ -45,7 +39,6 @@ public class MovableObject : MonoBehaviour
 
         isMoving = true;
 
-        // 이동 수행
         float distance = Vector2.Distance(transform.position, targetPos);
         float duration = distance / moveSpeed;
         float elapsedTime = 0f;
@@ -57,11 +50,14 @@ public class MovableObject : MonoBehaviour
             yield return null;
         }
 
-        transform.position = targetPos; // 정확한 위치로 이동
+        transform.position = targetPos;
 
         isMoving = false;
         animator.SetBool(hashMove, false);
 
         myTilePosition = tilePos;
+
+        // 코루틴 완료 후 콜백 호출
+        onMoveComplete?.Invoke();
     }
 }

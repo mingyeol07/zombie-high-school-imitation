@@ -13,16 +13,14 @@ public class Node
     public int HCost;
     public Node Parent;
 
-    public int FCost
+    public Node(bool walkable, Vector3Int gridPosition, int gCost, int hCost)
     {
-        get { return GCost + HCost; }
+        Walkable = walkable;
+        GridPosition = gridPosition;
+        GCost = gCost;
+        HCost = hCost;
+        Parent = null;
     }
 
-    public Node(bool _walkable, Vector3Int _gridPos, int _gCost, int _hCost)
-    {
-        Walkable = _walkable;
-        GridPosition = _gridPos;
-        GCost = _gCost;
-        HCost = _hCost;
-    }
+    public int FCost => GCost + HCost;
 }
