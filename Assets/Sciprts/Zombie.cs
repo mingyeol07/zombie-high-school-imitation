@@ -72,20 +72,19 @@ public class Zombie : MonoBehaviour
 
     private void TargetingMoveWithAStar()
     {
-        // 가상의 그리드 대신 타일맵을 기준으로 한 플레이어와 좀비의 위치 가져오기
+        Debug.Log("TargetingMoveWithAStar 호출됨");
+
         Vector3Int myTilePos = GameManager.Instance.WallTilemap.WorldToCell(transform.position);
         Vector3Int playerTilePos = GameManager.Instance.WallTilemap.WorldToCell(targetPlayer.position);
 
-        // 시작노드와 플레이어(도착)노드 생성
         Node startNode = new Node(true, myTilePos, 0, 0);
         Node playerNode = new Node(true, playerTilePos, 0, 0);
 
-        // 열린 리스트와 닫힌 리스트 생성
         List<Node> openSet = new();
         List<Node> closeSet = new();
 
-        // 열린 리스트에서 모두 검사하고 FCost가 가장 낮은 노드 찾기
         openSet.Add(startNode);
+        Debug.Log($"시작 노드: {startNode.GridPosition}, 플레이어 노드: {playerNode.GridPosition}");
 
         while (openSet.Count > 0)
         {
@@ -93,7 +92,6 @@ public class Zombie : MonoBehaviour
 
             for (int i = 1; i < openSet.Count; i++)
             {
-                // FCost가 더 낮거나 or 같을 때에는 HCost가 더 낮다면 true
                 if (openSet[i].FCost < currentNode.FCost ||
                     (openSet[i].FCost == currentNode.FCost && openSet[i].HCost < currentNode.HCost))
                 {
@@ -106,7 +104,8 @@ public class Zombie : MonoBehaviour
 
             if (currentNode.GridPosition == playerNode.GridPosition)
             {
-                RetracePath(startNode, playerNode);
+                Debug.Log("플레이어 노드에 도착했습니다.");
+                RetracePath(startNode, currentNode); // 끝 노드를 playerNode에서 currentNode로 수정
                 return;
             }
 
@@ -114,6 +113,7 @@ public class Zombie : MonoBehaviour
             {
                 if (!neighbor.Walkable || closeSet.Contains(neighbor))
                 {
+                    Debug.Log($"이웃 노드 건너뜀: {neighbor.GridPosition}, 이동 가능 여부: {neighbor.Walkable}");
                     continue;
                 }
 
@@ -122,14 +122,21 @@ public class Zombie : MonoBehaviour
                 {
                     neighbor.GCost = newCostToNeighbor;
                     neighbor.HCost = GetDistance(neighbor, playerNode);
-                    neighbor.Parent = currentNode;
+                    neighbor.Parent = currentNode;  // Parent 설정
+                    Debug.Log($"이웃 노드 부모 설정: {neighbor.GridPosition}의 부모는 {currentNode.GridPosition}입니다.");
 
                     if (!openSet.Contains(neighbor))
+                    {
                         openSet.Add(neighbor);
+                        Debug.Log($"이웃 노드 추가됨: {neighbor.GridPosition}");
+                    }
                 }
             }
         }
+
+        Debug.LogError("플레이어로 가는 경로를 찾지 못했습니다.");
     }
+
 
     List<Node> GetNeighbors(Node node, Tilemap tilemap)
     {
@@ -148,15 +155,15 @@ public class Zombie : MonoBehaviour
             Vector3Int neighborPos = node.GridPosition + direction;
             bool walkable = true;
 
-            //if (tilemap.GetTile(neighborPos) is CustomTile customTile && customTile.TileType != TileTypeID.Ground)
-            //{
-            //    walkable = false;
-            //}
-            //else
-            //{
-            //    // 타일이 없는 경우 (null 타일일 가능성이 있음)
-            //    walkable = true;
-            //}
+            if (tilemap.GetTile(neighborPos) is CustomTile customTile && customTile.TileType != TileTypeID.Ground)
+            {
+                walkable = false;
+            }
+            else
+            {
+                // 타일이 없는 경우 (null 타일일 가능성이 있음)
+                walkable = true;
+            }
 
             if (tilemap.HasTile(neighborPos)) walkable = false;
 
@@ -174,9 +181,18 @@ public class Zombie : MonoBehaviour
         while (currentNode != startNode)
         {
             path.Add(currentNode);
+            if (currentNode.Parent == null) break;
             currentNode = currentNode.Parent;
         }
+
         path.Reverse();
+
+        Debug.Log(currentNode.GridPosition);
+
+        for(int i = 0 ; i < path.Count; i++)
+        {
+            Debug.Log(path[i].GridPosition);
+        }
 
         if (path == null || path.Count == 0)
         {
