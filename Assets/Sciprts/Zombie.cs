@@ -9,9 +9,13 @@ public class Zombie : MonoBehaviour
 {
     [SerializeField] private Transform targetPlayer;
     [SerializeField] private LayerMask playerLayer;
-    private float moveTick;
+    [SerializeField] private Vector2 overlapBoxSize = new Vector2(5,5);
+    [SerializeField] private float moveSpeed = 8;
+    [SerializeField] private float moveDelay = 0.1f;
+    [SerializeField] private float moveTick = 1;
+    [SerializeField] private bool isTargetingMove;
 
-    [SerializeField] private MovableObject movableObject;
+    private MovableObject movableObject;
     private Animator animator;
     private SpriteRenderer spriteRenderer;
 
@@ -30,6 +34,12 @@ public class Zombie : MonoBehaviour
         animator = GetComponent<Animator>();
     }
 
+    private void Start()
+    {
+        movableObject = new MovableObject(GameManager.Instance.WallTilemap,animator, transform, hashMoveX, hashMoveY, hashMove);
+        WithoutPlayerMove();
+    }
+
     private void Update()
     {
         MoveHandler();
@@ -44,30 +54,31 @@ public class Zombie : MonoBehaviour
     {
         if (targetPlayer == null)
         {
-            moveTick += Time.deltaTime;
-            if (moveTick > 1)
-            {
-                WithoutPlayerMove();
-                moveTick = 0;
-            }
-
-            Collider2D player = Physics2D.OverlapBox(transform.position, new Vector2(5, 5), 0, playerLayer);
+            Collider2D player = Physics2D.OverlapBox(transform.position, overlapBoxSize, 0, playerLayer);
             if (player != null)
             {
                 targetPlayer = player.transform;
-                moveTick = 0;
+                isTargetingMove = true;
             }
         }
-        else
+        else if(isTargetingMove)
         {
-            moveTick += Time.deltaTime;
-            if (moveTick > 1)
+            if(movableObject.IsMoving)
             {
-                TargetingMoveWithAStar();
-                MoveAlongPath();
-                moveTick = 0;
+                return;
+            }
+            else
+            {
+                TargetingMove();
+                isTargetingMove = false;
             }
         }
+    }
+
+    private void TargetingMove()
+    {
+        TargetingMoveWithAStar();
+        MoveAlongPath();
     }
 
     private void TargetingMoveWithAStar()
@@ -207,7 +218,9 @@ public class Zombie : MonoBehaviour
     {
         if (movePath == null || movePath.Count == 0)
         {
+            // Èì ¹Ù²Ü ÇÊ¿ä¼º ÀÖÀ½.
             Debug.LogError("MovePath is null or empty!");
+            StartCoroutine(movableObject.Move(Vector2.zero, moveSpeed, moveDelay, () => { TargetingMove(); }));
             return;
         }
 
@@ -217,7 +230,7 @@ public class Zombie : MonoBehaviour
         movePath.RemoveAt(0);
 
         Vector3 direction = (nextStep - GameManager.Instance.WallTilemap.WorldToCell(transform.position)).normalized;
-        StartCoroutine(movableObject.Move(direction, animator, hashMoveX, hashMoveY, hashMove));
+        StartCoroutine(movableObject.Move(direction, moveSpeed, moveDelay, () => { TargetingMove(); }));
     }
 
     private int GetDistance(Node nodeA, Node nodeB)
@@ -232,8 +245,10 @@ public class Zombie : MonoBehaviour
 
     private void WithoutPlayerMove()
     {
+        if(targetPlayer != null) return;
         int RandomDirection = Random.Range(0, 4);
         Vector2Int direction = Vector2Int.zero;
+
         switch (RandomDirection)
         {
             case 0:
@@ -250,7 +265,7 @@ public class Zombie : MonoBehaviour
                 break;
         }
 
-        StartCoroutine(movableObject.Move(direction, animator, hashMoveX, hashMoveY, hashMove));
+        StartCoroutine(movableObject.Move(direction, moveSpeed, moveTick, () => { WithoutPlayerMove(); }));
     }
     #endregion
 

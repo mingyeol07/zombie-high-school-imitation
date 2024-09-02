@@ -3,9 +3,10 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    [SerializeField] private MovableObject movableObject;
+    private MovableObject movableObject;
     [SerializeField] private LayerMask zombieLayer;
     [SerializeField] private Animator weaponAnimator;
+    [SerializeField] private float moveSpeed;
     private Animator animator;
 
     private Vector2 localDirection;
@@ -24,6 +25,11 @@ public class Player : MonoBehaviour
         animator = GetComponent<Animator>();
     }
 
+    private void Start()
+    {
+        movableObject = new MovableObject(GameManager.Instance.WallTilemap, animator, transform, hashMoveX, hashMoveY, hashMove);
+    }
+
     private void Update()
     {
         AnimatorController();
@@ -34,25 +40,25 @@ public class Player : MonoBehaviour
             {
                 localAngle = 90;
                 localDirection = Vector2.right;
-                StartCoroutine(movableObject.Move(localDirection, animator, hashMoveX, hashMoveY, hashMove));
+                StartCoroutine(movableObject.Move(localDirection, moveSpeed));
             }
             else if (Input.GetKey(KeyCode.LeftArrow))
             {
                 localAngle = -90;
                 localDirection = Vector2.left;
-                StartCoroutine(movableObject.Move(localDirection, animator, hashMoveX, hashMoveY, hashMove));
+                StartCoroutine(movableObject.Move(localDirection, moveSpeed));
             }
             else if (Input.GetKey(KeyCode.UpArrow))
             {
                 localAngle = 180;
                 localDirection = Vector2.up;
-                StartCoroutine(movableObject.Move(localDirection, animator, hashMoveX, hashMoveY, hashMove));
+                StartCoroutine(movableObject.Move(localDirection, moveSpeed));
             }
             else if (Input.GetKey(KeyCode.DownArrow))
             {
                 localAngle = 0;
                 localDirection = Vector2.down;
-                StartCoroutine(movableObject.Move(localDirection, animator, hashMoveX, hashMoveY, hashMove));
+                StartCoroutine(movableObject.Move(localDirection, moveSpeed));
             }
         }
 
