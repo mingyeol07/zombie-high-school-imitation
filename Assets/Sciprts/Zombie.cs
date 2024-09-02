@@ -13,7 +13,7 @@ public class Zombie : MonoBehaviour
     [SerializeField] private float moveSpeed = 8;
     [SerializeField] private float moveDelay = 0.1f;
     [SerializeField] private float moveTick = 1;
-    [SerializeField] private bool isTargetingMove;
+    private bool isTargetingMove;
 
     private MovableObject movableObject;
     private Animator animator;
