@@ -1,22 +1,33 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
+using static UnityEngine.Rendering.VirtualTexturing.Debugging;
+using UnityEngine.UIElements;
 
-public class JoyButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class JoyButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler
 {
-    private bool isTouched;
-    public bool IsTouched => isTouched;
+    private bool isPressed;
+    [SerializeField] private RectTransform background;
+    private float colliderDistanceY;
 
-    public void OnPointerEnter(PointerEventData eventData)
+    public void OnPointerDown(PointerEventData eventData)
     {
-        isTouched = true;
+        isPressed = true;
+        OnDrag (eventData);
     }
 
-    public void OnPointerExit(PointerEventData eventData)
+    public void OnDrag(PointerEventData eventData)
     {
-        isTouched = false;
+        Vector2 pos;
+        pos = eventData.position;
+
+        pos.x = (pos.x / background.sizeDelta.x / 2);
+        pos.y = (pos.y / background.sizeDelta.y / 2);
+
+        Debug.Log(pos);
+    }
+
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        isPressed = false;
     }
 }
