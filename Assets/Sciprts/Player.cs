@@ -34,37 +34,39 @@ public class Player : MonoBehaviour
     {
         AnimatorController();
 
-        if(!movableObject.IsMoving)
-        {
-            if (Input.GetKey(KeyCode.RightArrow))
-            {
-                localAngle = 90;
-                localDirection = Vector2.right;
-                StartCoroutine(movableObject.Move(localDirection, moveSpeed));
-            }
-            else if (Input.GetKey(KeyCode.LeftArrow))
-            {
-                localAngle = -90;
-                localDirection = Vector2.left;
-                StartCoroutine(movableObject.Move(localDirection, moveSpeed));
-            }
-            else if (Input.GetKey(KeyCode.UpArrow))
-            {
-                localAngle = 180;
-                localDirection = Vector2.up;
-                StartCoroutine(movableObject.Move(localDirection, moveSpeed));
-            }
-            else if (Input.GetKey(KeyCode.DownArrow))
-            {
-                localAngle = 0;
-                localDirection = Vector2.down;
-                StartCoroutine(movableObject.Move(localDirection, moveSpeed));
-            }
-        }
-
         if (Input.GetKeyUp(KeyCode.J))
         {
             AttackChairman();
+        }
+    }
+
+    public void MoveToJoy(int MoveVec)
+    {
+        if (movableObject.IsMoving) return;
+
+        if (MoveVec == 1)
+        {
+            localAngle = 90;
+            localDirection = Vector2.right;
+            StartCoroutine(movableObject.Move(localDirection, moveSpeed));
+        }
+        else if (MoveVec == 2)
+        {
+            localAngle = -90;
+            localDirection = Vector2.left;
+            StartCoroutine(movableObject.Move(localDirection, moveSpeed));
+        }
+        else if (MoveVec == 3)
+        {
+            localAngle = 180;
+            localDirection = Vector2.up;
+            StartCoroutine(movableObject.Move(localDirection, moveSpeed));
+        }
+        else if (MoveVec == 4)
+        {
+            localAngle = 0;
+            localDirection = Vector2.down;
+            StartCoroutine(movableObject.Move(localDirection, moveSpeed));
         }
     }
 
