@@ -15,7 +15,7 @@ public class Zombie : MonoBehaviour
     [SerializeField] private float moveTick = 1;
     private bool isTargetingMove;
 
-    private MovableObject movableObject;
+    private MovableCharacter movableObject;
     private Animator animator;
     private SpriteRenderer spriteRenderer;
 
@@ -36,7 +36,7 @@ public class Zombie : MonoBehaviour
 
     private void Start()
     {
-        movableObject = new MovableObject(GameManager.Instance.WallTilemap,animator, transform, hashMoveX, hashMoveY, hashMove);
+        movableObject = new MovableCharacter(GameManager.Instance.WallTilemap,animator, transform, hashMoveX, hashMoveY, hashMove);
         WithoutPlayerMove();
     }
 

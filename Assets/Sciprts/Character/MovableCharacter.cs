@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using System;
 
-public class MovableObject
+public class MovableCharacter
 {
     private Tilemap tilemap;
     private Animator animator;
@@ -68,7 +68,7 @@ public class MovableObject
         onMoveComplete?.Invoke();
     }
 
-    public MovableObject(Tilemap wallTilemap, Animator animator,Transform transform,  int hashMoveX, int hashMoveY, int hashMove)
+    public MovableCharacter(Tilemap wallTilemap, Animator animator,Transform transform,  int hashMoveX, int hashMoveY, int hashMove)
     {
         this.tilemap = wallTilemap;
         this.animator = animator;

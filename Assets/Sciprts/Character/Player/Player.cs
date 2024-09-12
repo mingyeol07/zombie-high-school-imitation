@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    private MovableObject movableObject;
+    private MovableCharacter movableObject;
     [SerializeField] private LayerMask zombieLayer;
     [SerializeField] private Animator weaponAnimator;
     [SerializeField] private float moveSpeed;
@@ -27,7 +27,7 @@ public class Player : MonoBehaviour
 
     private void Start()
     {
-        movableObject = new MovableObject(GameManager.Instance.WallTilemap, animator, transform, hashMoveX, hashMoveY, hashMove);
+        movableObject = new MovableCharacter(GameManager.Instance.WallTilemap, animator, transform, hashMoveX, hashMoveY, hashMove);
     }
 
     private void Update()
