@@ -1,8 +1,15 @@
 using System.Collections;
 using UnityEngine;
 
+public enum MyOccupation
+{
+    Chairman, Hitman,
+}
+
 public class Player : MonoBehaviour
 {
+    public MyOccupation occupation;
+
     private MovableCharacter movableObject;
     [SerializeField] private LayerMask zombieLayer;
     [SerializeField] private Animator weaponAnimator;
@@ -10,15 +17,16 @@ public class Player : MonoBehaviour
     private Animator animator;
 
     private Vector2 localDirection;
-    private float localAngle;
+    private int localAngle;
 
     private readonly int hashMoveX = Animator.StringToHash("MoveX");
     private readonly int hashMoveY = Animator.StringToHash("MoveY");
     private readonly int hashMove = Animator.StringToHash("IsMove");
-    private readonly int hashAttack = Animator.StringToHash("Attack");
 
-    private readonly float chairmanOffset = 1.5f;
-    private readonly Vector2 chairmanAttack = new Vector2(3, 2);
+    private readonly int hashChairmanAttack = Animator.StringToHash("ChairmanAttack");
+    private readonly int hashHitmanAttack = Animator.StringToHash("HitmanAttack");
+
+    private OverlapChecker checker = new OverlapChecker();
 
     private void Awake()
     {
@@ -36,7 +44,9 @@ public class Player : MonoBehaviour
 
         if (Input.GetKeyUp(KeyCode.J))
         {
-            AttackChairman();
+            weaponAnimator.SetFloat(hashMoveX, localDirection.x);
+            weaponAnimator.SetFloat(hashMoveY, localDirection.y);
+            Attack();
         }
     }
 
@@ -75,14 +85,32 @@ public class Player : MonoBehaviour
         animator.SetBool(hashMove, movableObject != null && movableObject.IsMoving);
     }
 
-    private void AttackChairman()
+    private void Attack()
     {
-        weaponAnimator.SetFloat(hashMoveX, localDirection.x);
-        weaponAnimator.SetFloat(hashMoveY, localDirection.y);
-        weaponAnimator.SetTrigger(hashAttack);
+        switch (occupation)
+        {
+            case MyOccupation.Hitman:
+                HitmanAttack();
+                break;
+            case MyOccupation.Chairman:
+                ChairmanAttack();
+                break;
+        }
+    }
 
-        Vector2 colliderOffset = (Vector2)transform.position + new Vector2(localDirection.x * chairmanOffset, localDirection.y * chairmanOffset);
-        Collider2D[] colliders = Physics2D.OverlapBoxAll(colliderOffset, chairmanAttack, localAngle, zombieLayer);
+    private void ChairmanAttack()
+    {
+        weaponAnimator.SetTrigger(hashChairmanAttack);
+        Collider2D[] colliders = checker.GetChairmanAttackRangeInZombies(transform, localDirection, localAngle, zombieLayer);
+        foreach (Collider2D collider in colliders)
+        {
+            collider.transform.GetComponent<Zombie>()?.Hit();
+        }
+    }
+    private void HitmanAttack()
+    {
+        weaponAnimator.SetTrigger(hashHitmanAttack);
+        Collider2D[] colliders = checker.GetHitmanAttackRangeInZombies(transform, localDirection, localAngle, zombieLayer);
         foreach (Collider2D collider in colliders)
         {
             collider.transform.GetComponent<Zombie>()?.Hit();

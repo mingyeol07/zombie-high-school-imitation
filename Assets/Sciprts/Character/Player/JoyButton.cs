@@ -48,7 +48,6 @@ public class JoyButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 
         Vector2 pointerPosInJoy = pointerPos - joyPosition;
 
-        Debug.Log(pointerPos);
         //Debug.Log(pointerPosInJoy);
         // y = x 와 y = -x 기준으로 영역을 나눔
         if (pointerPosInJoy.y < pointerPosInJoy.x && pointerPosInJoy.y > -pointerPosInJoy.x)
