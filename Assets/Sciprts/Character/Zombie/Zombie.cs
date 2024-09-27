@@ -207,7 +207,7 @@ public class Zombie : MonoBehaviour
 
         if (path == null || path.Count == 0)
         {
-            Debug.LogError("Path is null or empty!");
+            Debug.Log("Path is null or empty!");
             return;
         }
 
@@ -219,7 +219,7 @@ public class Zombie : MonoBehaviour
         if (movePath == null || movePath.Count == 0)
         {
             // Èì ¹Ù²Ü ÇÊ¿ä¼º ÀÖÀ½.
-            Debug.LogError("MovePath is null or empty!");
+            Debug.Log("MovePath is null or empty!");
             StartCoroutine(movableObject.Move(Vector2.zero, moveSpeed, moveDelay, () => { TargetingMove(); }));
             return;
         }

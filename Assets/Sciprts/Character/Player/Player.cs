@@ -44,8 +44,6 @@ public class Player : MonoBehaviour
 
         if (Input.GetKeyUp(KeyCode.J))
         {
-            weaponAnimator.SetFloat(hashMoveX, localDirection.x);
-            weaponAnimator.SetFloat(hashMoveY, localDirection.y);
             Attack();
         }
     }
@@ -85,8 +83,11 @@ public class Player : MonoBehaviour
         animator.SetBool(hashMove, movableObject != null && movableObject.IsMoving);
     }
 
-    private void Attack()
+    public void Attack()
     {
+        weaponAnimator.SetFloat(hashMoveX, localDirection.x);
+        weaponAnimator.SetFloat(hashMoveY, localDirection.y);
+
         switch (occupation)
         {
             case MyOccupation.Hitman:
