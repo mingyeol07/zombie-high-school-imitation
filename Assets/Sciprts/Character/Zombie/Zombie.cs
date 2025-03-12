@@ -18,6 +18,7 @@ public class Zombie : MonoBehaviour
     private MovableCharacter movableObject;
     private Animator animator;
     private SpriteRenderer spriteRenderer;
+    private LineRenderer lineRenderer;
 
     private List<Node> movePath;
 
@@ -32,6 +33,14 @@ public class Zombie : MonoBehaviour
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
+
+        lineRenderer = GetComponent<LineRenderer>();
+        lineRenderer.startWidth = 0.1f;
+        lineRenderer.endWidth = 0.1f;
+        lineRenderer.positionCount = 0;
+        lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
+        lineRenderer.startColor = Color.green;
+        lineRenderer.endColor = Color.green;
     }
 
     private void Start()
@@ -95,7 +104,7 @@ public class Zombie : MonoBehaviour
         List<Node> closeSet = new();
 
         openSet.Add(startNode);
-        Debug.Log($"시작 노드: {startNode.GridPosition}, 플레이어 노드: {playerNode.GridPosition}");
+        //Debug.Log($"시작 노드: {startNode.GridPosition}, 플레이어 노드: {playerNode.GridPosition}");
 
         while (openSet.Count > 0)
         {
@@ -124,7 +133,7 @@ public class Zombie : MonoBehaviour
             {
                 if (!neighbor.Walkable || closeSet.Contains(neighbor))
                 {
-                    Debug.Log($"이웃 노드 건너뜀: {neighbor.GridPosition}, 이동 가능 여부: {neighbor.Walkable}");
+                    //Debug.Log($"이웃 노드 건너뜀: {neighbor.GridPosition}, 이동 가능 여부: {neighbor.Walkable}");
                     continue;
                 }
 
@@ -134,12 +143,12 @@ public class Zombie : MonoBehaviour
                     neighbor.GCost = newCostToNeighbor;
                     neighbor.HCost = GetDistance(neighbor, playerNode);
                     neighbor.Parent = currentNode;  // Parent 설정
-                    Debug.Log($"이웃 노드 부모 설정: {neighbor.GridPosition}의 부모는 {currentNode.GridPosition}입니다.");
+                    //Debug.Log($"이웃 노드 부모 설정: {neighbor.GridPosition}의 부모는 {currentNode.GridPosition}입니다.");
 
                     if (!openSet.Contains(neighbor))
                     {
                         openSet.Add(neighbor);
-                        Debug.Log($"이웃 노드 추가됨: {neighbor.GridPosition}");
+                        //Debug.Log($"이웃 노드 추가됨: {neighbor.GridPosition}");
                     }
                 }
             }
@@ -197,28 +206,14 @@ public class Zombie : MonoBehaviour
         }
 
         path.Reverse();
-
-        Debug.Log(currentNode.GridPosition);
-
-        for(int i = 0 ; i < path.Count; i++)
-        {
-            Debug.Log(path[i].GridPosition);
-        }
-
-        if (path == null || path.Count == 0)
-        {
-            Debug.Log("Path is null or empty!");
-            return;
-        }
-
         movePath = path;
+        DrawPath(path); // 경로 시각화 추가
     }
 
     private void MoveAlongPath()
     {
         if (movePath == null || movePath.Count == 0)
         {
-            // 흠 바꿀 필요성 있음.
             Debug.Log("MovePath is null or empty!");
             StartCoroutine(movableObject.Move(Vector2.zero, moveSpeed, moveDelay, () => { TargetingMove(); }));
             return;
@@ -288,4 +283,17 @@ public class Zombie : MonoBehaviour
         hitCurColorTime = 0f;
     }
     #endregion
+
+    private void DrawPath(List<Node> path)
+    {
+        if (path == null || path.Count == 0) return;
+
+        lineRenderer.positionCount = path.Count + 1;
+        lineRenderer.SetPosition(0, transform.position);
+
+        for (int i = 0; i < path.Count; i++)
+        {
+            lineRenderer.SetPosition(i + 1, GameManager.Instance.WallTilemap.CellToWorld(path[i].GridPosition) + new Vector3(0.5f, 0.5f, 0));
+        }
+    }
 }
