@@ -1,5 +1,6 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Burst.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -7,7 +8,7 @@ using UnityEngine.Tilemaps;
 
 public class Zombie : MonoBehaviour
 {
-    [SerializeField] private Transform targetPlayer;
+    [SerializeField] public Transform targetPlayer;
     [SerializeField] private LayerMask playerLayer;
     [SerializeField] private Vector2 overlapBoxSize = new Vector2(5,5);
     [SerializeField] private float moveSpeed = 8;
@@ -18,9 +19,6 @@ public class Zombie : MonoBehaviour
     private MovableCharacter movableObject;
     private Animator animator;
     private SpriteRenderer spriteRenderer;
-    private LineRenderer lineRenderer;
-
-    private List<Node> movePath;
 
     private float hitMaxColorTime = 0.5f;
     private float hitCurColorTime;
@@ -29,18 +27,25 @@ public class Zombie : MonoBehaviour
     private readonly int hashMoveY = Animator.StringToHash("MoveY");
     private readonly int hashMove = Animator.StringToHash("IsMove");
 
+    private AStar atar;
+    private DFS dfs;
+    private BFS bfs;
+    private Dijkstra dijkstra;
+
+    public bool isAstar;
+    public bool isBfs;
+    public bool isDfs;
+    public bool isDijkstra;
+
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
 
-        lineRenderer = GetComponent<LineRenderer>();
-        lineRenderer.startWidth = 0.1f;
-        lineRenderer.endWidth = 0.1f;
-        lineRenderer.positionCount = 0;
-        lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
-        lineRenderer.startColor = Color.green;
-        lineRenderer.endColor = Color.green;
+        atar = GetComponent<AStar>();
+        dfs = GetComponent<DFS>();
+        bfs = GetComponent<BFS>();
+        dijkstra = GetComponent<Dijkstra>();
     }
 
     private void Start()
@@ -55,9 +60,9 @@ public class Zombie : MonoBehaviour
         HitHandler();
     }
 
-    #region ¿Ãµø «‘ºˆ
+    #region Ïù¥Îèô Ìï®Ïàò
     /// <summary>
-    /// ¡ª∫Ò¿« ¿Ãµø¿ª ¡¶æÓ
+    /// Ï¢ÄÎπÑÏùò Ïù¥ÎèôÏùÑ Ï†úÏñ¥
     /// </summary>
     private void MoveHandler()
     {
@@ -84,133 +89,26 @@ public class Zombie : MonoBehaviour
         }
     }
 
+    public void ResetPathFinding()
+    {
+        isAstar = false;
+        isBfs = false;
+        isDfs = false;
+        isDijkstra = false;
+    }
+
     private void TargetingMove()
     {
-        TargetingMoveWithAStar();
-        MoveAlongPath();
+        Debug.Log("DD");
+        List<Node> path = null;
+        if (isAstar) path = atar.GetMovePath(transform.position, targetPlayer.position);
+        else if (isBfs) path = bfs.GetMovePath(transform.position, targetPlayer.position);
+        else if (isDfs) path = dfs.GetMovePath(transform.position, targetPlayer.position);
+        else if (isDijkstra) path = dijkstra.GetMovePath(transform.position, targetPlayer.position);
+        MoveAlongPath(path);
     }
 
-    private void TargetingMoveWithAStar()
-    {
-        Debug.Log("TargetingMoveWithAStar »£√‚µ ");
-
-        Vector3Int myTilePos = GameManager.Instance.WallTilemap.WorldToCell(transform.position);
-        Vector3Int playerTilePos = GameManager.Instance.WallTilemap.WorldToCell(targetPlayer.position);
-
-        Node startNode = new Node(true, myTilePos, 0, 0);
-        Node playerNode = new Node(true, playerTilePos, 0, 0);
-
-        List<Node> openSet = new();
-        List<Node> closeSet = new();
-
-        openSet.Add(startNode);
-        //Debug.Log($"Ω√¿€ ≥ÎµÂ: {startNode.GridPosition}, «√∑π¿ÃæÓ ≥ÎµÂ: {playerNode.GridPosition}");
-
-        while (openSet.Count > 0)
-        {
-            Node currentNode = openSet[0];
-
-            for (int i = 1; i < openSet.Count; i++)
-            {
-                if (openSet[i].FCost < currentNode.FCost ||
-                    (openSet[i].FCost == currentNode.FCost && openSet[i].HCost < currentNode.HCost))
-                {
-                    currentNode = openSet[i];
-                }
-            }
-
-            openSet.Remove(currentNode);
-            closeSet.Add(currentNode);
-
-            if (currentNode.GridPosition == playerNode.GridPosition)
-            {
-                Debug.Log("«√∑π¿ÃæÓ ≥ÎµÂø° µµ¬¯«ﬂΩ¿¥œ¥Ÿ.");
-                RetracePath(startNode, currentNode); // ≥° ≥ÎµÂ∏¶ playerNodeø°º≠ currentNode∑Œ ºˆ¡§
-                return;
-            }
-
-            foreach (Node neighbor in GetNeighbors(currentNode, GameManager.Instance.WallTilemap))
-            {
-                if (!neighbor.Walkable || closeSet.Contains(neighbor))
-                {
-                    //Debug.Log($"¿ÃøÙ ≥ÎµÂ ∞«≥ ∂‹: {neighbor.GridPosition}, ¿Ãµø ∞°¥… ø©∫Œ: {neighbor.Walkable}");
-                    continue;
-                }
-
-                int newCostToNeighbor = currentNode.GCost + GetDistance(currentNode, neighbor);
-                if (newCostToNeighbor < neighbor.GCost || !openSet.Contains(neighbor))
-                {
-                    neighbor.GCost = newCostToNeighbor;
-                    neighbor.HCost = GetDistance(neighbor, playerNode);
-                    neighbor.Parent = currentNode;  // Parent º≥¡§
-                    //Debug.Log($"¿ÃøÙ ≥ÎµÂ ∫Œ∏ º≥¡§: {neighbor.GridPosition}¿« ∫Œ∏¥¬ {currentNode.GridPosition}¿‘¥œ¥Ÿ.");
-
-                    if (!openSet.Contains(neighbor))
-                    {
-                        openSet.Add(neighbor);
-                        //Debug.Log($"¿ÃøÙ ≥ÎµÂ √ﬂ∞°µ : {neighbor.GridPosition}");
-                    }
-                }
-            }
-        }
-
-        Debug.LogError("«√∑π¿ÃæÓ∑Œ ∞°¥¬ ∞Ê∑Œ∏¶ √£¡ˆ ∏¯«ﬂΩ¿¥œ¥Ÿ.");
-    }
-
-
-    List<Node> GetNeighbors(Node node, Tilemap tilemap)
-    {
-        List<Node> neighbors = new List<Node>();
-
-        // ¿ÃøÙ ≈∏¿œ¿« ªÛ¥Î¿˚¿Œ ¿ßƒ°∏¶ ¡§¿««’¥œ¥Ÿ.
-        Vector3Int[] directions = {
-            new Vector3Int(1, 0, 0),
-            new Vector3Int(-1, 0, 0),
-            new Vector3Int(0, 1, 0),
-            new Vector3Int(0, -1, 0)
-        };
-
-        foreach (Vector3Int direction in directions)
-        {
-            Vector3Int neighborPos = node.GridPosition + direction;
-            bool walkable = true;
-
-            if (tilemap.GetTile(neighborPos) is CustomTile customTile && customTile.TileType != TileTypeID.Ground)
-            {
-                walkable = false;
-            }
-            else
-            {
-                // ≈∏¿œ¿Ã æ¯¥¬ ∞ÊøÏ (null ≈∏¿œ¿œ ∞°¥…º∫¿Ã ¿÷¿Ω)
-                walkable = true;
-            }
-
-            if (tilemap.HasTile(neighborPos)) walkable = false;
-
-            neighbors.Add(new Node(walkable, neighborPos, node.GCost, node.HCost));
-        }
-
-        return neighbors;
-    }
-
-    void RetracePath(Node startNode, Node endNode)
-    {
-        List<Node> path = new List<Node>();
-        Node currentNode = endNode;
-
-        while (currentNode != startNode)
-        {
-            path.Add(currentNode);
-            if (currentNode.Parent == null) break;
-            currentNode = currentNode.Parent;
-        }
-
-        path.Reverse();
-        movePath = path;
-        DrawPath(path); // ∞Ê∑Œ Ω√∞¢»≠ √ﬂ∞°
-    }
-
-    private void MoveAlongPath()
+    private void MoveAlongPath(List<Node> movePath)
     {
         if (movePath == null || movePath.Count == 0)
         {
@@ -226,16 +124,6 @@ public class Zombie : MonoBehaviour
 
         Vector3 direction = (nextStep - GameManager.Instance.WallTilemap.WorldToCell(transform.position)).normalized;
         StartCoroutine(movableObject.Move(direction, moveSpeed, moveDelay, () => { TargetingMove(); }));
-    }
-
-    private int GetDistance(Node nodeA, Node nodeB)
-    {
-        // XøÕ Y ¡¬«• ¬˜¿Ã¿« ¿˝¥Î∞™¿ª ∞ËªÍ«’¥œ¥Ÿ.
-        int dstX = Mathf.Abs(nodeA.GridPosition.x - nodeB.GridPosition.x);
-        int dstY = Mathf.Abs(nodeA.GridPosition.y - nodeB.GridPosition.y);
-
-        // ∏««ÿ∆∞ ∞≈∏Æ∏¶ ∞ËªÍ«’¥œ¥Ÿ.
-        return dstX + dstY;
     }
 
     private void WithoutPlayerMove()
@@ -264,9 +152,9 @@ public class Zombie : MonoBehaviour
     }
     #endregion
 
-    #region ««∞› «‘ºˆ
+    #region ÌîºÍ≤© Ìï®Ïàò
     /// <summary>
-    /// ¡ª∫Ò¿« ««∞›¿ª ¡¶æÓ
+    /// Ï¢ÄÎπÑÏùò ÌîºÍ≤©ÏùÑ Ï†úÏñ¥
     /// </summary>
     private void HitHandler()
     {
@@ -283,17 +171,4 @@ public class Zombie : MonoBehaviour
         hitCurColorTime = 0f;
     }
     #endregion
-
-    private void DrawPath(List<Node> path)
-    {
-        if (path == null || path.Count == 0) return;
-
-        lineRenderer.positionCount = path.Count + 1;
-        lineRenderer.SetPosition(0, transform.position);
-
-        for (int i = 0; i < path.Count; i++)
-        {
-            lineRenderer.SetPosition(i + 1, GameManager.Instance.WallTilemap.CellToWorld(path[i].GridPosition) + new Vector3(0.5f, 0.5f, 0));
-        }
-    }
 }
