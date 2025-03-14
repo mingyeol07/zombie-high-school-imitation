@@ -1,6 +1,8 @@
 ﻿// # Systems
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+
 
 // # Unity
 using UnityEngine;
@@ -16,11 +18,11 @@ public class DFS : FindingAWay
 
     public override List<Node> GetMovePath(Vector2 startPosition, Vector2 endPosition)
     {
-        Vector3Int startTilePos = GameManager.Instance.WallTilemap.WorldToCell(startPosition);
-        Vector3Int endTilePos = GameManager.Instance.WallTilemap.WorldToCell(endPosition);
+        Vector3Int startTilePos = groundTileMap.WorldToCell(startPosition);
+        Vector3Int endTilePos = groundTileMap.WorldToCell(endPosition);
 
-        Node startNode = new Node(true, startTilePos, 0, 0);
-        Node endNode = new Node(true, endTilePos, 0, 0);
+        Node startNode = GameManager.Instance.GetOrCreateNode(startTilePos);
+        Node endNode = GameManager.Instance.GetOrCreateNode(endTilePos);
 
         Stack<Node> stack = new();
         HashSet<Vector3Int> visited = new();
@@ -36,10 +38,11 @@ public class DFS : FindingAWay
 
             if (currentNode.GridPosition == endNode.GridPosition)
             {
+                DrawSearchPath(visited.ToArray());
                 return RetracePath(parentMap, startNode, currentNode);
             }
 
-            foreach (Node neighbor in GetNeighbors(currentNode, GameManager.Instance.WallTilemap))
+            foreach (Node neighbor in GetNeighbors(currentNode))
             {
                 if (!neighbor.Walkable || visited.Contains(neighbor.GridPosition))
                 {
@@ -52,7 +55,7 @@ public class DFS : FindingAWay
             }
         }
 
-        return new List<Node>(); // 경로를 찾지 못한 경우 빈 리스트 반환
+        return null;
     }
 
     private List<Node> RetracePath(Dictionary<Vector3Int, Node> parentMap, Node startNode, Node endNode)

@@ -9,12 +9,14 @@ using UnityEngine.Tilemaps;
 public abstract class FindingAWay : MonoBehaviour
 {
     [SerializeField] protected LineRenderer lineRenderer ;
+    protected Tilemap groundTileMap;
+    protected Tilemap wallTileMap;
 
     Vector3Int[] directions = {
-            new Vector3Int(1, 0, 0),
-            new Vector3Int(-1, 0, 0),
             new Vector3Int(0, 1, 0),
-            new Vector3Int(0, -1, 0)
+            new Vector3Int(1, 0, 0),
+            new Vector3Int(0, -1, 0),
+            new Vector3Int(-1, 0, 0),
         };
 
     protected virtual void Awake()
@@ -25,29 +27,35 @@ public abstract class FindingAWay : MonoBehaviour
         lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
     }
 
+    private void Start()
+    {
+        groundTileMap = GameManager.Instance.GroundTilemap;
+        wallTileMap = GameManager.Instance.WallTilemap;
+    }
+
     public abstract List<Node> GetMovePath(Vector2 startPosition, Vector2 endPosition);
 
-    public List<Node> GetNeighbors(Node node, Tilemap tilemap)
+    public void ResetLine()
+    {
+        lineRenderer.gameObject.SetActive(false);
+    }
+
+    public List<Node> GetNeighbors(Node node)
     {
         List<Node> neighbors = new List<Node>();
+        
         foreach (Vector3Int direction in directions)
         {
             Vector3Int neighborPos = node.GridPosition + direction;
-            bool walkable = !tilemap.HasTile(neighborPos);
 
-            //if (tilemap.GetTile(neighborPos) is CustomTile customTile && customTile.TileType != TileTypeID.Ground)
-            //{
-            //    walkable = false;
-            //}
-            //else
-            //{
-            //    // 타일이 없는 경우 (null 타일일 가능성이 있음)
-            //    walkable = true;
-            //}
+            bool isWallTile = wallTileMap.GetTile(neighborPos) is CustomTile customTile && customTile.TileType != TileTypeID.Ground;
 
-            neighbors.Add(new Node(walkable, neighborPos, node.GCost, node.HCost));
+            if (!isWallTile && groundTileMap.HasTile(neighborPos))
+            {
+                Node neighbor = GameManager.Instance.GetOrCreateNode(neighborPos);
+                neighbors.Add(neighbor);
+            }
         }
-
         return neighbors;
     }
 
@@ -59,5 +67,31 @@ public abstract class FindingAWay : MonoBehaviour
 
         // 맨해튼 거리를 계산합니다.
         return dstX + dstY;
+    }
+
+    protected void DrawSearchPath(List<Node> searchedNodes)
+    {
+        if (searchedNodes == null || searchedNodes.Count == 0) return;
+
+        lineRenderer.gameObject.SetActive(true);
+        lineRenderer.positionCount = searchedNodes.Count;
+
+        for (int i = 0; i < searchedNodes.Count; i++)
+        {
+            lineRenderer.SetPosition(i, GameManager.Instance.WallTilemap.CellToWorld(searchedNodes[i].GridPosition) + new Vector3(0.5f, 0.5f, 0));
+        }
+    }
+
+    protected void DrawSearchPath(Vector3Int[] searchedNodes)
+    {
+        if (searchedNodes == null || searchedNodes.Length == 0) return;
+
+        lineRenderer.gameObject.SetActive(true);
+        lineRenderer.positionCount = searchedNodes.Length;
+
+        for (int i = 0; i < searchedNodes.Length; i++)
+        {
+            lineRenderer.SetPosition(i, GameManager.Instance.WallTilemap.CellToWorld(searchedNodes[i]) + new Vector3(0.5f, 0.5f, 0));
+        }
     }
 }

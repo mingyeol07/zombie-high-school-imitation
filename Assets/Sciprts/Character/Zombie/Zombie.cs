@@ -95,11 +95,15 @@ public class Zombie : MonoBehaviour
         isBfs = false;
         isDfs = false;
         isDijkstra = false;
+
+        dijkstra.ResetLine();
+        atar.ResetLine();
+        dfs.ResetLine();
+        bfs.ResetLine();
     }
 
     private void TargetingMove()
     {
-        Debug.Log("DD");
         List<Node> path = null;
         if (isAstar) path = atar.GetMovePath(transform.position, targetPlayer.position);
         else if (isBfs) path = bfs.GetMovePath(transform.position, targetPlayer.position);
@@ -112,17 +116,23 @@ public class Zombie : MonoBehaviour
     {
         if (movePath == null || movePath.Count == 0)
         {
-            Debug.Log("MovePath is null or empty!");
             StartCoroutine(movableObject.Move(Vector2.zero, moveSpeed, moveDelay, () => { TargetingMove(); }));
             return;
         }
 
         if (movableObject.IsMoving) return;
 
-        Vector3 nextStep = movePath[0].GridPosition;
-        movePath.RemoveAt(0);
+        Vector3 nextStep;
+        Vector3 myPos;
+        do
+        {
+            nextStep = movePath[0].GridPosition;
+            movePath.RemoveAt(0);
 
-        Vector3 direction = (nextStep - GameManager.Instance.WallTilemap.WorldToCell(transform.position)).normalized;
+            myPos = GameManager.Instance.WallTilemap.WorldToCell(transform.position);
+        } while (nextStep == myPos && movePath.Count  > 0);
+
+        Vector3 direction = (nextStep - myPos).normalized;
         StartCoroutine(movableObject.Move(direction, moveSpeed, moveDelay, () => { TargetingMove(); }));
     }
 

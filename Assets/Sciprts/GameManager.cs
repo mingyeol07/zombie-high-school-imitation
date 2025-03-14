@@ -14,6 +14,8 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
     [SerializeField] private Tilemap wallTilemap;
     public Tilemap WallTilemap { get { return wallTilemap; } }
+    [SerializeField] private Tilemap groundTilemap;
+    public Tilemap GroundTilemap { get { return groundTilemap; } }
 
     private Player localPlayer;
     public Player Player => localPlayer;
@@ -31,6 +33,17 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject zombiePrefab;
 
     [SerializeField] private TMP_Text txt_zombieCount;
+
+    private Dictionary<Vector3Int, Node> nodeCache = new();
+
+    public Node GetOrCreateNode(Vector3Int position)
+    {
+        if (!nodeCache.ContainsKey(position))
+        {
+            nodeCache[position] = new Node(true, position, 0, 0);
+        }
+        return nodeCache[position];
+    }
 
     private void Awake()
     {

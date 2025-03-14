@@ -32,7 +32,8 @@ public class MovableCharacter
         Vector3 targetPos = tilemap.GetCellCenterWorld(targetCell);
         Vector3Int tilePos = new Vector3Int(Mathf.FloorToInt(targetPos.x), Mathf.FloorToInt(targetPos.y), Mathf.FloorToInt(targetPos.z));
 
-        if (tilemap.GetTile(tilePos) is CustomTile customTile && customTile.TileType == TileTypeID.Wall)
+        if ((tilemap.GetTile(tilePos) is CustomTile customTile && customTile.TileType == TileTypeID.Wall)
+            || !GameManager.Instance.GroundTilemap.HasTile(tilePos))
         {
             isMoving = false;
             animator.SetBool(hashMove, false);

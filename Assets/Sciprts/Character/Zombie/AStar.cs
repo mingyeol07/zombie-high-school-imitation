@@ -23,8 +23,8 @@ public class AStar : FindingAWay
         Vector3Int myTilePos = GameManager.Instance.WallTilemap.WorldToCell(startPosition);
         Vector3Int playerTilePos = GameManager.Instance.WallTilemap.WorldToCell(endPosition);
 
-        Node startNode = new Node(true, myTilePos, 0, 0);
-        Node playerNode = new Node(true, playerTilePos, 0, 0);
+        Node startNode = GameManager.Instance.GetOrCreateNode(myTilePos);
+        Node playerNode = GameManager.Instance.GetOrCreateNode(playerTilePos);
 
         List<Node> openSet = new();
         HashSet<Node> closeSet = new();
@@ -55,7 +55,7 @@ public class AStar : FindingAWay
                 return RetracePath(startNode, currentNode);
             }
 
-            foreach (Node neighbor in GetNeighbors(currentNode, GameManager.Instance.WallTilemap))
+            foreach (Node neighbor in GetNeighbors(currentNode))
             {
                 if (!neighbor.Walkable || closeSet.Contains(neighbor))
                 {
@@ -82,18 +82,6 @@ public class AStar : FindingAWay
         return null;
     }
 
-
-    private void DrawSearchPath(List<Node> searchedNodes)
-    {
-        if (searchedNodes == null || searchedNodes.Count == 0) return;
-
-        lineRenderer.positionCount = searchedNodes.Count;
-
-        for (int i = 0; i < searchedNodes.Count; i++)
-        {
-            lineRenderer.SetPosition(i, GameManager.Instance.WallTilemap.CellToWorld(searchedNodes[i].GridPosition) + new Vector3(0.5f, 0.5f, 0));
-        }
-    }
     private new int GetDistance(Node nodeA, Node nodeB)
     {
         // X와 Y 좌표 차이의 절대값을 계산합니다.
