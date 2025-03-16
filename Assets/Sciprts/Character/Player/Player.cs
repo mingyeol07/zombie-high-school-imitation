@@ -28,6 +28,8 @@ public class Player : MonoBehaviour
 
     private OverlapChecker checker = new OverlapChecker();
 
+    public Vector2 myPos = new Vector2(-0.5f, -0.5f);
+
     private void Awake()
     {
         animator = GetComponent<Animator>();
@@ -56,25 +58,25 @@ public class Player : MonoBehaviour
         {
             localAngle = 90;
             localDirection = Vector2.right;
-            StartCoroutine(movableObject.Move(localDirection, moveSpeed));
+            StartCoroutine(movableObject.Move(localDirection, moveSpeed,0, () => { myPos += Vector2.right; }));
         }
         else if (MoveVec == 2)
         {
             localAngle = -90;
             localDirection = Vector2.left;
-            StartCoroutine(movableObject.Move(localDirection, moveSpeed));
+            StartCoroutine(movableObject.Move(localDirection, moveSpeed,0, () => { myPos += Vector2.left; })); 
         }
         else if (MoveVec == 3)
         {
             localAngle = 180;
             localDirection = Vector2.up;
-            StartCoroutine(movableObject.Move(localDirection, moveSpeed));
+            StartCoroutine(movableObject.Move(localDirection, moveSpeed, 0, () => { myPos += Vector2.up; }));
         }
         else if (MoveVec == 4)
         {
             localAngle = 0;
             localDirection = Vector2.down;
-            StartCoroutine(movableObject.Move(localDirection, moveSpeed));
+            StartCoroutine(movableObject.Move(localDirection, moveSpeed, 0, () => { myPos += Vector2.down; }));
         }
     }
 

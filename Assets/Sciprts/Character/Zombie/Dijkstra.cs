@@ -3,8 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.Experimental.GraphView;
-
 
 // # Unity
 using UnityEngine;
@@ -32,8 +30,10 @@ public class Dijkstra : FindingAWay
         PriorityQueue<Node, int> pq = new();
 
         // 직사각형 범위의 모든 노드 생성
-        Vector3Int minPos = new Vector3Int(Math.Min(startTilePos.x, endTilePos.x), Math.Min(startTilePos.y, endTilePos.y), 0);
-        Vector3Int maxPos = new Vector3Int(Math.Max(startTilePos.x, endTilePos.x), Math.Max(startTilePos.y, endTilePos.y), 0);
+        //Vector3Int minPos = new Vector3Int(Math.Min(startTilePos.x, endTilePos.x), Math.Min(startTilePos.y, endTilePos.y), 0);
+        //Vector3Int maxPos = new Vector3Int(Math.Max(startTilePos.x, endTilePos.x), Math.Max(startTilePos.y, endTilePos.y), 0);
+        Vector3Int minPos = new Vector3Int(-15, -9, 0);
+        Vector3Int maxPos = new Vector3Int(15, 8, 0);
 
         for (int x = minPos.x; x <= maxPos.x; x++)
         {

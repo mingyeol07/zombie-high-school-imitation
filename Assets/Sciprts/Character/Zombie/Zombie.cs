@@ -121,6 +121,11 @@ public class Zombie : MonoBehaviour
         }
 
         if (movableObject.IsMoving) return;
+        Debug.Log(GameManager.Instance.WallTilemap.WorldToCell(transform.position));
+        for (int i =0; i < movePath.Count; i++)
+        {
+            Debug.Log(movePath[i].GridPosition);
+        }
 
         Vector3 nextStep;
         Vector3 myPos;

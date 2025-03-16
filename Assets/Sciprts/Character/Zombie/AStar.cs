@@ -18,8 +18,6 @@ public class AStar : FindingAWay
 
     public override List<Node> GetMovePath(Vector2 startPosition, Vector2 endPosition)
     {
-        Debug.Log("TargetingMoveWithAStar 호출됨");
-
         Vector3Int myTilePos = GameManager.Instance.WallTilemap.WorldToCell(startPosition);
         Vector3Int playerTilePos = GameManager.Instance.WallTilemap.WorldToCell(endPosition);
 
@@ -50,7 +48,6 @@ public class AStar : FindingAWay
             // 목표 노드 도착 시 경로 찾기
             if (currentNode.GridPosition == playerNode.GridPosition)
             {
-                Debug.Log("플레이어 노드에 도착했습니다.");
                 DrawSearchPath(closeSet.ToList());
                 return RetracePath(startNode, currentNode);
             }

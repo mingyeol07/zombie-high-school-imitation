@@ -13,10 +13,10 @@ public abstract class FindingAWay : MonoBehaviour
     protected Tilemap wallTileMap;
 
     Vector3Int[] directions = {
-            new Vector3Int(0, 1, 0),
             new Vector3Int(1, 0, 0),
-            new Vector3Int(0, -1, 0),
             new Vector3Int(-1, 0, 0),
+            new Vector3Int(0, 1, 0),
+            new Vector3Int(0, -1, 0),
         };
 
     protected virtual void Awake()

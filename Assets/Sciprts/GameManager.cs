@@ -108,4 +108,10 @@ public class GameManager : MonoBehaviour
         zombieList.Add(zombie);
         txt_zombieCount.text = "Zombie Count : " + zombieList.Count;
     }
+
+    public bool IsPlayerTile(Vector2 vec)
+    {
+        if(vec == Player.myPos) return true;
+        return false;
+    }
 }
