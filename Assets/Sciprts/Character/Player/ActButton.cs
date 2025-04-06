@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// 공격버튼
 public class ActButton : MonoBehaviour
 {
     public void PointerDown()

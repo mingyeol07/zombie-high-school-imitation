@@ -2,6 +2,12 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
+public enum MoveDirection {
+
+    Left, Right, Up, Down
+}
+
+// 조이스틱 클래스
 public class JoyButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
     private RectTransform joyRect;
@@ -52,22 +58,22 @@ public class JoyButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         // y = x 와 y = -x 기준으로 영역을 나눔
         if (pointerPosInJoy.y < pointerPosInJoy.x && pointerPosInJoy.y > -pointerPosInJoy.x)
         {
-            localPlayer.MoveToJoy(1); // 오른쪽
+            localPlayer.MoveByJoystick(MoveDirection.Right); // 오른쪽
             SetArrowColor(img_arrowRight);
         }
         else if (pointerPosInJoy.y > pointerPosInJoy.x && pointerPosInJoy.y < -pointerPosInJoy.x)
         {
-            localPlayer.MoveToJoy(2); // 왼쪽
+            localPlayer.MoveByJoystick(MoveDirection.Left); // 왼쪽
             SetArrowColor(img_arrowLeft);
         }
         else if (pointerPosInJoy.y > pointerPosInJoy.x && pointerPosInJoy.y > -pointerPosInJoy.x)
         {
-            localPlayer.MoveToJoy(3); // 위쪽
+            localPlayer.MoveByJoystick(MoveDirection.Up); // 위쪽
             SetArrowColor(img_arrowUp);
         }
         else if (pointerPosInJoy.y < pointerPosInJoy.x && pointerPosInJoy.y < -pointerPosInJoy.x)
         {
-            localPlayer.MoveToJoy(4); // 아래쪽
+            localPlayer.MoveByJoystick(MoveDirection.Down); // 아래쪽
             SetArrowColor(img_arrowDown);
         }
     }

@@ -9,26 +9,31 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
 
+// 이동할 노드들, 테스트 버튼들을 관리
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
-    [SerializeField] private Tilemap wallTilemap;
-    public Tilemap WallTilemap { get { return wallTilemap; } }
-    [SerializeField] private Tilemap groundTilemap;
-    public Tilemap GroundTilemap { get { return groundTilemap; } }
 
-    private Player localPlayer;
+    // 벽 타일이 있는지 체크하는 타일 맵
+    [SerializeField] private Tilemap wallTilemap;
+    public Tilemap WallTilemap => wallTilemap;
+
+    [SerializeField] private Tilemap groundTilemap;
+    public Tilemap GroundTilemap => groundTilemap;
+
+    [SerializeField]  private Player localPlayer;
     public Player Player => localPlayer;
 
-    List<Zombie> zombieList = new List<Zombie>();
+    private List<Zombie> zombieList = new List<Zombie>();
 
+    #region 테스트용 버튼들
     [SerializeField] private Button btn_spawnZombie_1;
     [SerializeField] private Button btn_spawnZombie_10;
-
     [SerializeField] private Button btn_dfs;
     [SerializeField] private Button btn_bfs;
     [SerializeField] private Button btn_dijkstra;
     [SerializeField] private Button btn_astar;
+    #endregion
 
     [SerializeField] private GameObject zombiePrefab;
 
@@ -48,8 +53,6 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-
-        localPlayer = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
 
         btn_dfs.onClick.AddListener(() =>
         {
@@ -103,6 +106,7 @@ public class GameManager : MonoBehaviour
         });
     }
 
+    // 좀비가 몇마리인지 화면에 보여주기
     public void SetZombie(Zombie zombie)
     {
         zombieList.Add(zombie);

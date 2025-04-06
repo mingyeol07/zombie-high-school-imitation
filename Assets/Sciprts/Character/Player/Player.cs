@@ -1,88 +1,60 @@
 using System.Collections;
 using UnityEngine;
 
+// 직업군 타입
 public enum MyOccupation
 {
     Chairman, Hitman,
 }
 
-public class Player : MonoBehaviour
+public class Player : Character
 {
-    public MyOccupation occupation;
-
-    private MovableCharacter movableObject;
     [SerializeField] private LayerMask zombieLayer;
-    [SerializeField] private Animator weaponAnimator;
-    [SerializeField] private float moveSpeed;
-    private Animator animator;
+    private float moveSpeed = 8;
 
     private Vector2 localDirection;
     private int localAngle;
 
-    private readonly int hashMoveX = Animator.StringToHash("MoveX");
-    private readonly int hashMoveY = Animator.StringToHash("MoveY");
-    private readonly int hashMove = Animator.StringToHash("IsMove");
+    #region 무기 관련
+    public MyOccupation occupation;
+    [SerializeField] private Animator weaponAnimator;
 
     private readonly int hashChairmanAttack = Animator.StringToHash("ChairmanAttack");
     private readonly int hashHitmanAttack = Animator.StringToHash("HitmanAttack");
+    #endregion
 
-    private OverlapChecker checker = new OverlapChecker();
-
+    // 다른 곳에서 플레이어의 위치 검사를 위해 필요한 변수
+    // ex. 좀비가 플레이어의 위치와 자신의 위치가 같을 때
     public Vector2 myPos = new Vector2(-0.5f, -0.5f);
 
-    private void Awake()
+    public void MoveByJoystick(MoveDirection dir)
     {
-        animator = GetComponent<Animator>();
-    }
+        if (isMoving) return;
 
-    private void Start()
-    {
-        movableObject = new MovableCharacter(GameManager.Instance.WallTilemap, animator, transform, hashMoveX, hashMoveY, hashMove);
-    }
-
-    private void Update()
-    {
-        AnimatorController();
-
-        if (Input.GetKeyUp(KeyCode.J))
-        {
-            Attack();
-        }
-    }
-
-    public void MoveToJoy(int MoveVec)
-    {
-        if (movableObject.IsMoving) return;
-
-        if (MoveVec == 1)
+        if (dir == MoveDirection.Right)
         {
             localAngle = 90;
             localDirection = Vector2.right;
-            StartCoroutine(movableObject.Move(localDirection, moveSpeed,0, () => { myPos += Vector2.right; }));
+            StartCoroutine(Move(localDirection, moveSpeed,0, () => { myPos += Vector2.right; }));
         }
-        else if (MoveVec == 2)
+        else if (dir == MoveDirection.Left)
         {
             localAngle = -90;
             localDirection = Vector2.left;
-            StartCoroutine(movableObject.Move(localDirection, moveSpeed,0, () => { myPos += Vector2.left; })); 
+            StartCoroutine(Move(localDirection, moveSpeed,0, () => { myPos += Vector2.left; })); 
         }
-        else if (MoveVec == 3)
+        else if (dir == MoveDirection.Up)
         {
             localAngle = 180;
             localDirection = Vector2.up;
-            StartCoroutine(movableObject.Move(localDirection, moveSpeed, 0, () => { myPos += Vector2.up; }));
+            StartCoroutine(Move(localDirection, moveSpeed, 0, () => { myPos += Vector2.up; }));
         }
-        else if (MoveVec == 4)
+        else if (dir == MoveDirection.Down)
         {
             localAngle = 0;
             localDirection = Vector2.down;
-            StartCoroutine(movableObject.Move(localDirection, moveSpeed, 0, () => { myPos += Vector2.down; }));
+            StartCoroutine(Move(localDirection, moveSpeed, 0, () => { myPos += Vector2.down; }));
         }
-    }
-
-    private void AnimatorController()
-    {
-        animator.SetBool(hashMove, movableObject != null && movableObject.IsMoving);
     }
 
     public void Attack()
@@ -104,7 +76,7 @@ public class Player : MonoBehaviour
     private void ChairmanAttack()
     {
         weaponAnimator.SetTrigger(hashChairmanAttack);
-        Collider2D[] colliders = checker.GetChairmanAttackRangeInZombies(transform, localDirection, localAngle, zombieLayer);
+        Collider2D[] colliders = OverlapChecker.GetChairmanAttackRangeInZombies(transform, localDirection, localAngle, zombieLayer);
         foreach (Collider2D collider in colliders)
         {
             collider.transform.GetComponent<Zombie>()?.Hit();
@@ -113,7 +85,7 @@ public class Player : MonoBehaviour
     private void HitmanAttack()
     {
         weaponAnimator.SetTrigger(hashHitmanAttack);
-        Collider2D[] colliders = checker.GetHitmanAttackRangeInZombies(transform, localDirection, localAngle, zombieLayer);
+        Collider2D[] colliders = OverlapChecker.GetHitmanAttackRangeInZombies(transform, localDirection, localAngle, zombieLayer);
         foreach (Collider2D collider in colliders)
         {
             collider.transform.GetComponent<Zombie>()?.Hit();

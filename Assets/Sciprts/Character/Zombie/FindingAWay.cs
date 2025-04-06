@@ -6,10 +6,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
+// 길찾기 상위 클래스
 public abstract class FindingAWay : MonoBehaviour
 {
     [SerializeField] protected LineRenderer lineRenderer ;
-    protected Tilemap groundTileMap;
+    protected Tilemap groundTileMap; 
     protected Tilemap wallTileMap;
 
     Vector3Int[] directions = {
@@ -40,13 +41,14 @@ public abstract class FindingAWay : MonoBehaviour
         lineRenderer.gameObject.SetActive(false);
     }
 
-    public List<Node> GetNeighbors(Node node)
+    // 현재 노드를 중심으로 네 방향의 이웃노드들을 타일 맵 기반으로 가져옴
+    public List<Node> GetNeighbors(Node currentNode)
     {
         List<Node> neighbors = new List<Node>();
         
         foreach (Vector3Int direction in directions)
         {
-            Vector3Int neighborPos = node.GridPosition + direction;
+            Vector3Int neighborPos = currentNode.GridPosition + direction;
 
             bool isWallTile = wallTileMap.GetTile(neighborPos) is CustomTile customTile && customTile.TileType != TileTypeID.Ground;
 
@@ -59,16 +61,7 @@ public abstract class FindingAWay : MonoBehaviour
         return neighbors;
     }
 
-    public int GetDistance(Node nodeA, Node nodeB)
-    {
-        // X와 Y 좌표 차이의 절대값을 계산합니다.
-        int dstX = Mathf.Abs(nodeA.GridPosition.x - nodeB.GridPosition.x);
-        int dstY = Mathf.Abs(nodeA.GridPosition.y - nodeB.GridPosition.y);
-
-        // 맨해튼 거리를 계산합니다.
-        return dstX + dstY;
-    }
-
+    // 라인 렌더러로 검사한 Node들을  그림
     protected void DrawSearchPath(List<Node> searchedNodes)
     {
         if (searchedNodes == null || searchedNodes.Count == 0) return;
@@ -82,6 +75,7 @@ public abstract class FindingAWay : MonoBehaviour
         }
     }
 
+    // 라인 렌더러로 검사한 위치들을  그림
     protected void DrawSearchPath(Vector3Int[] searchedNodes)
     {
         if (searchedNodes == null || searchedNodes.Length == 0) return;

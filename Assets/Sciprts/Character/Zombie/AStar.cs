@@ -81,11 +81,11 @@ public class AStar : FindingAWay
 
     private new int GetDistance(Node nodeA, Node nodeB)
     {
-        // X와 Y 좌표 차이의 절대값을 계산합니다.
+        // X와 Y 좌표 차이의 절대값을 계산
         int dstX = Mathf.Abs(nodeA.GridPosition.x - nodeB.GridPosition.x);
         int dstY = Mathf.Abs(nodeA.GridPosition.y - nodeB.GridPosition.y);
 
-        // 맨해튼 거리를 계산합니다.
+        // 맨해튼 거리를 계산
         return dstX + dstY;
     }
     List<Node> RetracePath(Node startNode, Node endNode)

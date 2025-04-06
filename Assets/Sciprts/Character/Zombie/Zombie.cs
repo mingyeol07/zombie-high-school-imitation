@@ -6,26 +6,20 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class Zombie : MonoBehaviour
+public class Zombie : Character
 {
     [SerializeField] public Transform targetPlayer;
     [SerializeField] private LayerMask playerLayer;
-    [SerializeField] private Vector2 overlapBoxSize = new Vector2(5,5);
-    [SerializeField] private float moveSpeed = 8;
-    [SerializeField] private float moveDelay = 0.1f;
-    [SerializeField] private float moveTick = 1;
-    private bool isTargetingMove;
+    [SerializeField] private Vector2 detectionSize = new Vector2(5,5);
+    private float moveSpeed = 4;
+    private float moveDelay = 0.1f;
+    private float moveTick = 1;
 
-    private MovableCharacter movableObject;
-    private Animator animator;
+    private bool isTargetingMove;
     private SpriteRenderer spriteRenderer;
 
     private float hitMaxColorTime = 0.5f;
     private float hitCurColorTime;
-
-    private readonly int hashMoveX = Animator.StringToHash("MoveX");
-    private readonly int hashMoveY = Animator.StringToHash("MoveY");
-    private readonly int hashMove = Animator.StringToHash("IsMove");
 
     private AStar atar;
     private DFS dfs;
@@ -37,10 +31,9 @@ public class Zombie : MonoBehaviour
     public bool isDfs;
     public bool isDijkstra;
 
-    private void Awake()
+    protected override void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        animator = GetComponent<Animator>();
 
         atar = GetComponent<AStar>();
         dfs = GetComponent<DFS>();
@@ -48,14 +41,15 @@ public class Zombie : MonoBehaviour
         dijkstra = GetComponent<Dijkstra>();
     }
 
-    private void Start()
+    protected override void Start()
     {
-        movableObject = new MovableCharacter(GameManager.Instance.WallTilemap,animator, transform, hashMoveX, hashMoveY, hashMove);
+        base.Start();
         WithoutPlayerMove();
     }
 
-    private void Update()
+    protected override void Update()
     {
+        base.Update();
         MoveHandler();
         HitHandler();
     }
@@ -68,7 +62,7 @@ public class Zombie : MonoBehaviour
     {
         if (targetPlayer == null)
         {
-            Collider2D player = Physics2D.OverlapBox(transform.position, overlapBoxSize, 0, playerLayer);
+            Collider2D player = Physics2D.OverlapBox(transform.position, detectionSize, 0, playerLayer);
             if (player != null)
             {
                 targetPlayer = player.transform;
@@ -77,7 +71,7 @@ public class Zombie : MonoBehaviour
         }
         else if(isTargetingMove)
         {
-            if(movableObject.IsMoving)
+            if(isMoving)
             {
                 return;
             }
@@ -116,11 +110,11 @@ public class Zombie : MonoBehaviour
     {
         if (movePath == null || movePath.Count == 0)
         {
-            StartCoroutine(movableObject.Move(Vector2.zero, moveSpeed, moveDelay, () => { TargetingMove(); }));
+            StartCoroutine(Move(Vector2.zero, moveSpeed, moveDelay, () => { TargetingMove(); }));
             return;
         }
 
-        if (movableObject.IsMoving) return;
+        if (isMoving) return;
         Debug.Log(GameManager.Instance.WallTilemap.WorldToCell(transform.position));
         for (int i =0; i < movePath.Count; i++)
         {
@@ -138,7 +132,7 @@ public class Zombie : MonoBehaviour
         } while (nextStep == myPos && movePath.Count  > 0);
 
         Vector3 direction = (nextStep - myPos).normalized;
-        StartCoroutine(movableObject.Move(direction, moveSpeed, moveDelay, () => { TargetingMove(); }));
+        StartCoroutine(Move(direction, moveSpeed, moveDelay, () => { TargetingMove(); }));
     }
 
     private void WithoutPlayerMove()
@@ -163,7 +157,7 @@ public class Zombie : MonoBehaviour
                 break;
         }
 
-        StartCoroutine(movableObject.Move(direction, moveSpeed, moveTick, () => { WithoutPlayerMove(); }));
+        StartCoroutine(Move(direction, moveSpeed, moveTick, () => { WithoutPlayerMove(); }));
     }
     #endregion
 
